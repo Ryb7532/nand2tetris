@@ -1,9 +1,15 @@
+tools
+*.pdf
+
 *.tst
 *.out
 *.cmp
 *.hack
 *.asm
 *.vm
+Assembler
+VMtranslator
+
 
 # Prerequisites
 *.d
