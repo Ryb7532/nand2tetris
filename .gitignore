@@ -7,8 +7,10 @@ tools
 *.hack
 *.asm
 *.vm
+*.xml
 Assembler
 VMtranslator
+JackAnalyser
 
 
 # Prerequisites
