@@ -112,10 +112,10 @@ void CodeWrite::writePushPop(VMcommand cmd, string seg, int index) {
   }
 }
 
-void CodeWrite::writeLabel(string label) { fout << "(" << label << ")\n"; }
+void CodeWrite::writeLabel(string label) { fout << "(" << funcName << "$" << label << ")\n"; }
 
 void CodeWrite::writeGoto(string label) {
-  fout << "\t@" << label << "\n"
+  fout << "\t@" << funcName << "$" << label << "\n"
        << "\t0;JMP\n";
 }
 
@@ -123,7 +123,7 @@ void CodeWrite::writeIf(string label) {
   fout << "\t@SP\n"
        << "\tAM=M-1\n"
        << "\tD=M\n"
-       << "\t@" << label << "\n"
+       << "\t@" << funcName << "$" << label << "\n"
        << "\tD;JNE\n";
 }
 
@@ -178,8 +178,8 @@ void CodeWrite::writeReturn() {
        << "\t0;JMP\n";
 }
 
-void CodeWrite::writeFunction(string funcName, int nLocals) {
-  fout << "(" << funcName << ")\n"
+void CodeWrite::writeFunction(string funcName_, int nLocals) {
+  fout << "(" << funcName_ << ")\n"
        << "\t@SP\n"
        << "\tA=M\n";
   for (int i=0; i<nLocals; i++) {
@@ -189,6 +189,7 @@ void CodeWrite::writeFunction(string funcName, int nLocals) {
   fout << "\tD=A\n"
        << "\t@SP\n"
        << "\tM=D\n";
+  funcName = funcName_;
 }
 
 void CodeWrite::callerSave() {

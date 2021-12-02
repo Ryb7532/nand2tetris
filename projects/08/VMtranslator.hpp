@@ -54,6 +54,7 @@ class CodeWrite {
   private:
     ofstream fout;
     string fileName;
+    string funcName;
     int alabel=0;
     int rlabel=0;
   public:
