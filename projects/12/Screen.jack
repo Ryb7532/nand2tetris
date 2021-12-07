@@ -10,34 +10,162 @@
  * the screen is indexed (0,0).
  */
 class Screen {
+    static int screenAddr;
+    static boolean color;
+    static Array bit;
 
     /** Initializes the Screen. */
     function void init() {
+        var int i;
+        let screenAddr = 16384;
+        let color = true;
+        let bit = Array.new(17);
+        let i = 0;
+        let bit[0] = 1;
+        while (i < 16) {
+            let bit[i+1] = bit[i] + bit[i];
+            let i = i + 1;
+        }
+        return;
     }
 
     /** Erases the entire screen. */
     function void clearScreen() {
+        var int i;
+        let i = 0;
+        while (i < 8192) {
+            let screenAddr[i] = 0;
+            let i = i + 1;
+        }
+        return;
     }
 
     /** Sets the current color, to be used for all subsequent drawXXX commands.
      *  Black is represented by true, white by false. */
     function void setColor(boolean b) {
+        let color = b;
+        return;
     }
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
+        var int addr, b;
+        if ((x < 0) | (x > 511) | (y < 0) | (y > 255)) {
+            do Sys.error(7);
+        }
+        let addr = x / 16;
+        let b = x - (addr * 16);
+        let addr = addr + (y * 32);
+        do Screen.updateLocation(b, addr);
+        return;
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int startX, startY, endX, endY, dx, dy, a, b, diff, db;
+        var boolean minus;
+        if (x2 < x1) {
+            let startX = x2;
+            let startY = y2;
+            let endX = x1;
+            let endY = y1;
+        } else {
+            let startX = x1;
+            let startY = y1;
+            let endX = x2;
+            let endY = y2;
+        }
+        let dx = endX - startX;
+        let dy = endY - startY;
+        let a = 0;
+        let b = 0;
+        if (dy = 0) {
+            let diff = -1;
+        } else {
+            let diff = 0;
+        }
+        let minus = dy < 0;
+        let dy = Math.abs(dy);
+        while (~(a > dx) & ~(b > dy)) {
+            if (minus) {
+                do Screen.drawPixel(startX+a, startY-b);
+            } else {
+                do Screen.drawPixel(startX+a, startY+b);
+            }
+            if (diff < 0) {
+                let a = a + 1;
+                let diff = diff + dy;
+            } else {
+                let b = b + 1;
+                let diff = diff - dx;
+            }
+        }
+        return;
     }
 
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int i, j, k, laddr, lb, raddr, rb;
+        if ((x1 > x2) | (y1 > y2) | (x1 < 0) | (x2 > 511) | (y1 < 0) | (y2 > 255)) {
+            do Sys.error(9);
+        }
+        let laddr = x1 / 16;
+        let lb = x1 - (laddr * 16);
+        let laddr = laddr + (y1 * 32);
+        let raddr = x2 / 16;
+        let rb = x2 - (raddr * 16);
+        let raddr = raddr + (y1 * 32);
+        let i = y1;
+        while (~(i > y2)) {
+            let j = laddr;
+            let k = lb;
+            while (j < raddr) {
+                while (k < 16) {
+                    do Screen.updateLocation(k, j);
+                    let k = k + 1;
+                }
+                let k = 0;
+                let j = j + 1;
+            }
+            while (~(k > rb)) {
+                do Screen.updateLocation(k, j);
+                let k = k + 1;
+            }
+            let laddr = laddr + 32;
+            let raddr = raddr + 32;
+            let i = i + 1;
+        }
+        return;
     }
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
+        var int dy, dx, sqR;
+        if ((x < 0) | (x > 511) | (y < 0) | (y > 255)) {
+            do Sys.error(13);
+        }
+        if ((r < 0) | (r > 181) | (x < r) | (x+r > 511) | (y < r) | (y+r > 255)) {
+            do Sys.error(12);
+        }
+        let dy = r;
+        let sqR = r * r;
+        while (dy > 0) {
+            let dx = Math.sqrt(sqR - (dy * dy));
+            do Screen.drawLine(x-dx, y-dy, x+dx, y-dy);
+            do Screen.drawLine(x-dx, y+dy, x+dx, y+dy);
+            let dy = dy - 1;
+        }
+        do Screen.drawLine(x-r, y, x+r, y);
+        return;
+    }
+
+    function void updateLocation(int b, int addr) {
+        if (color) {
+            let screenAddr[addr] = screenAddr[addr] | bit[b];
+        } else {
+            let screenAddr[addr] = screenAddr[addr] & ~bit[b];
+        }
+        return;
     }
 }

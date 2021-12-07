@@ -8,21 +8,48 @@
  * Note: Jack compilers implement multiplication and division using OS method calls.
  */
 class Math {
+    static Array bit, result;
 
     /** Initializes the library. */
     function void init() {
+        var int i;
+        let result = Array.new(16);
+        let bit = Array.new(16); // bit[i] = 2^i
+        let bit[0] = 1;
+        let i = 0;
+        while (i < 15) {
+            let i = i + 1;
+            let bit[i] = bit[i-1] + bit[i-1];
+        }
+        return;
     }
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
+        if (x < 0) {
+            let x = -x;
+        }
+        return x;
     }
 
-    /** Returns the product of x and y. 
+    /** Returns the product of x and y.
      *  When a Jack compiler detects the multiplication operator '*' in the 
      *  program's code, it handles it by invoking this method. In other words,
      *  the Jack expressions x*y and multiply(x,y) return the same value.
      */
     function int multiply(int x, int y) {
+        var int sum, shiftedX, j;
+        let sum = 0;
+        let shiftedX = x;
+        let j = 0;
+        while (j < 16) {
+            if (~((bit[j] & y) = 0)) {
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;
+            let j = j + 1;
+        }
+        return sum;
     }
 
     /** Returns the integer part of x/y.
@@ -31,17 +58,71 @@ class Math {
      *  the Jack expressions x/y and divide(x,y) return the same value.
      */
     function int divide(int x, int y) {
+        var int j, res;
+        var bool minus, flag;
+        if (y = 0) {
+            do Sys.error(3);
+        }
+        let j = 0;
+        let res = 0;
+        let minus = ((x<0) & (y>0)) | ((x>0) & (y<0));
+        let flag = false;
+        let result[0] = Math.abs(y); // result[j] = 2^j * abs(y)
+        let x = Math.abs(x);
+        while (~flag) {
+            let flag = (32767 - result[j]) < result[j]; // 32767 = 2^15 - 1
+            if (~flag) {
+                let result[j+1] = result[j] + result[j];
+                let flag = result[j+1] > x;
+                if (~flag) {
+                    let j = j + 1;
+                }
+            }
+        }
+        while (j > -1) {
+            if (~(result[j] > x)) {
+                let res = res + bit[j];
+                let x = x - result[j];
+            }
+            let j = j - 1;
+        }
+        if (minus) {
+            let res = -res;
+        }
+        return res;
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
+        var int j, tmp, tmp2, res;
+        if (x < 0) {
+            do Sys.error(4);
+        }
+        let j = 7;
+        while (j > -1) {
+            let tmp = res + bit[j];
+            let tmp2 = tmp * tmp;
+            if (~(tmp2 > x) & (tmp2 > 0)) {
+                let res = tmp;
+            }
+            let j = j - 1;
+        }
+        return res;
     }
 
     /** Returns the greater number. */
     function int max(int a, int b) {
+        if (a < b) {
+            let a = b;
+        }
+        return a;
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {
+        if (a > b) {
+            let a = b;
+        }
+        return a;
     }
 }
